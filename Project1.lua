@@ -1,127 +1,259 @@
--- This entire code is modified from HTDBarsi#3056's script, My code is totally different from this, UI is added by twist --
--- Feel free to change whatever in this script. This simple starter template is modified by twist --
-_G.range = 100
-_G.cooldown = 0.75
-local plr = game:GetService'Players'['LocalPlayer']
-local class = plr.Character.Properties.Class.Value
-local Classes = {
-   ["Swordmaster"]     = {"Swordmaster1", "Swordmaster2", "Swordmaster3", "Swordmaster4", "Swordmaster5", "Swordmaster6", "CrescentStrike1", "CrescentStrike2", "CrescentStrike3", "Leap"};
-   ["Mage"]            = {"Mage1", "ArcaneBlastAOE", "ArcaneBlast", "ArcaneWave1", "ArcaneWave2", "ArcaneWave3", "ArcaneWave4", "ArcaneWave5", "ArcaneWave6", "ArcaneWave7", "ArcaneWave8", "ArcaneWave9"};
-   ["Defender"]        = {"Defender1", "Defender2", "Defender3", "Defender4", "Defender5", "Groundbreaker", "Spin1", "Spin2", "Spin3", "Spin4", "Spin5"};
-   ["DualWielder"]     = {"DualWield1", "DualWield2", "DualWield3", "DualWield4", "DualWield5", "DualWield6", "DualWield7", "DualWield8", "DualWield9", "DualWield10", "DashStrike", "CrossSlash1", "CrossSlash2", "CrossSlash3", "CrossSlash4"};
-   ["Guardian"]        = {"Guardian1", "Guardian2", "Guardian3", "Guardian4", "SlashFury1", "SlashFury2", "SlashFury3", "SlashFury4", "SlashFury5", "SlashFury6", "SlashFury7", "SlashFury8", "SlashFury9", "SlashFury10", "SlashFury11", "SlashFury12", "SlashFury13", "RockSpikes1", "RockSpikes2", "RockSpikes3"};
-   ["IcefireMage"]     = {"IcefireMage1", "IcySpikes1", "IcySpikes2", "IcySpikes3", "IcySpikes4", "IcefireMageFireballBlast", "IcefireMageFireball", "LightningStrike1", "LightningStrike2", "LightningStrike3", "LightningStrike4", "LightningStrike5", "IcefireMageUltimateFrost", "IcefireMageUltimateMeteor1"};
-   ["Berserker"]       = {"Berserker1", "Berserker2", "Berserker3", "Berserker4", "Berserker5", "Berserker6", "AggroSlam", "GigaSpin1", "GigaSpin2", "GigaSpin3", "GigaSpin4", "GigaSpin5", "GigaSpin6", "GigaSpin7", "GigaSpin8", "Fissure1", "Fissure2", "FissureErupt1", "FissureErupt2", "FissureErupt3", "FissureErupt4", "FissureErupt5"};
-   ["Paladin"]         = {"Paladin1", "Paladin2", "Paladin3", "Paladin4", "LightThrust1", "LightThrust2", "LightPaladin1", "LightPaladin2"};
-   ["MageOfLight"]     = {"MageOfLight", "MageOfLightBlast"};
-   ["Demon"]           = {"Demon1", "Demon4", "Demon7", "Demon10", "Demon13", "Demon16", "Demon19", "Demon22", "Demon25", "DemonDPS1", "DemonDPS2", "DemonDPS3", "DemonDPS4", "DemonDPS5", "DemonDPS6", "DemonDPS7", "DemonDPS8", "DemonDPS9", "ScytheThrowDPS1", "ScytheThrowDPS2", "ScytheThrowDPS3", "DemonLifeStealDPS", "DemonSoulDPS1", "DemonSoulDPS2", "DemonSoulDPS3"};
-   ["Dragoon"]         = {"Dragoon1", "Dragoon2", "Dragoon3", "Dragoon4", "Dragoon5", "Dragoon6"};
-   ["Archer"]          = {"Archer", "PiercingArrow1", "PiercingArrow2", "PiercingArrow3", "PiercingArrow4", "PiercingArrow5"};
-   ["Warlord"]         = {"Warlord1", "Warlord2", "Warlord3", "Warlord4",};
-};
-local cl = Classes[class]
-function closest()
-   local Character = plr.Character
-   local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-   if not (Character or HumanoidRootPart) then return end
-   local TargetDistance,Target = math.huge, nil
-   for _,v in next, workspace.Mobs:GetChildren() do
-       if v:FindFirstChild("Collider") then
-           local mag = (HumanoidRootPart.Position - v.Collider.Position).magnitude
-           if mag < TargetDistance and mag <= _G.range and v.HealthProperties.Health.Value > 0 then
-               TargetDistance = mag
-               Target = v
-           end
-       end
-   end
-   return Target
-end
-local function KillAura()
-    local ind = 0
-    repeat task.wait()
-    local c = closest()
-    if c then
-        ind = ind + 1
-        game:GetService("ReplicatedStorage").Shared.Combat.Attack:FireServer(cl[ind],c.Collider.Position, c.Collider.Position - plr.Character.HumanoidRootPart.Position)
-        task.wait(_G.cooldown)
-        if ind >= #cl then
-            ind = 0
-        end
-    end
-    until plr.Character.Humanoid.Health <= 0
-end
-
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/HeiKe2022/Mod-UI/main/ModTurtle.lua"))()
-local SecA = library:window("World Zero")
-SecA:toggle("Kill Aura", false, function(bool)
-    if bool then
-        KillAura()
-    end
-end)
-SecA:slider("Cooldown",1,15,7, function(value)
-    _G.cooldown = value/10
-end)
-SecA:toggle("Collect Drop", false, function(bool)
-    if bool then
-        while bool do
-            for _,v in pairs(workspace.Coins:GetChildren'') do
-                if v.Name == "CoinPart" then
-                    v.CanCollide = false
-                    v.Position = plr.Character.HumanoidRootPart.Position + Vector3.new(0,-1,0)
-                end
-            end
-            task.wait(1/4)
-        end
-    end
-end)
-SecA:slider("Walk Speed",16, 120, 80, function(value)
-    plr.Character.Humanoid.WalkSpeed = value
-end)
-SecA:slider("Jump Power",70, 160, 150, function(value)
-    plr.Character.Humanoid.JumpPower = value
-end)
-
-local a = getrawmetatable(game)
-local b = a.__index
-local c = a.__newindex
-setreadonly(a, false)
-local d = plr.Character.Humanoid
-local e = d.WalkSpeed
-local f = d.JumpPower
-a.__newindex =
-    newcclosure(
-    function(g, h, i)
-        if checkcaller() then
-            return c(g, h, i)
-        elseif g:IsA "Humanoid" and h == "WalkSpeed" then
-            i = tonumber(i)
-            if not i then
-                i = 0
-            end
-            e = i
-        elseif g:IsA "Humanoid" and h == "JumpPower" then
-            i = tonumber(i)
-            if not i then
-                i = 0
-            end
-            f = i
-        else
-            return c(g, h, i)
-        end
-    end
-)
-a.__index =
-    newcclosure(
-    function(g, h)
-        if checkcaller() then
-            return b(g, h)
-        elseif g:IsA "Humanoid" and h == "WalkSpeed" then
-            return e
-        elseif g:IsA "Humanoid" and h == "JumpPower" then
-            return f
-        else
-            return b(g, h)
-        end
-    end
-)
-setreadonly(a, true)
+repeat wait(2)until game:IsLoaded()and game.Players and game.Players.LocalPlayerand game.Players.LocalPlayer.Character;
+   local a=game:GetService'CoreGui'
+   local b=game:GetService'Workspace'
+   local c=game:GetService'RunService'
+   local d=game:GetService'StarterGui'
+   local e=game:GetService'HttpService'
+   local f=game:GetService'TweenService'
+   local g=game:GetService'Players'['LocalPlayer']
+   local h=game:GetService'UserInputService'
+   local i=game:GetService'ReplicatedStorage'
+   local j=game:GetService'VirtualInputManager'
+   local k=g.Character or g.CharacterAdded:Wait''
+   local l={[1.1]=2978696440,[1.2]=4310464656,[1.3]=4310476380,[1.4]=4310478830,[1]=3383444582,[2.1]=3885726701,[2.2]=3994953548,[2.3]=4050468028,[2]=3165900886,[3.1]=4465988196,[3.2]=4465989351,[3]=4465989998,[4.1]=4646473427,[4.2]=4646475342,[4]=4646475570,[5.1]=6386112652,[6.1]=6510862058,[7.1]=6847034886,[8.1]=9944263348,[8.2]=10014664329,[9.1]=10651527284,[9.2]=10727165164,['Halloween']=5862277651}
+   local m={[1]=5703353651,[2]=6075085184,[3]=7071564842,[4]=10089970465,[5]=10795158121}
+   local n={[1]=4310463616,[2]=4310463940,[3]=4465987684,[4]=4646472003,[5]=5703355191,[6]=6075083204,[7]=6847035264,[8]=9944262922,[9]=10651517727}
+   local o={'MoltenEgg','OceanEgg','CatEgg','AlligatorEgg','FairyEgg'}
+   local p={"SummonerSummonWeak","SummonerSummonStrong","CorruptedGreaterTree","DavyJones","BOSSHogRider","BOSSAnubis","BOSSKrakenArm3-Arm#1","BOSSKrakenArm3-Arm#2","BOSSKrakenArm3-Arm#3","BOSSKrakenArm3-Arm#4","BOSSKrakenArm3-Arm#5","BOSSKrakenArm3-Arm#6","BOSSKrakenArm3-Arm#7","BOSSKrakenArm3-Arm#8"}
+   local q=k.Properties.Class.Value;
+   local r={["Swordmaster"]={"Swordmaster1","Swordmaster2","Swordmaster3","Swordmaster4","Swordmaster5","Swordmaster6"},["Mage"]={"Mage1","Mage2","Mage3"},["Defender"]={"Defender1","Defender2","Defender3","Defender4","Defender5"},["DualWielder"]={"DualWield1","DualWield2","DualWield3","DualWield4","DualWield5","DualWield6","DualWield7","DualWield8","DualWield9","DualWield10"},["Guardian"]={"Guardian1","Guardian2","Guardian3","Guardian4"},["IcefireMage"]={"IcefireMage1","IcefireMage2","IcefireMage3"},["Demon"]={"Demon1","Demon2","Demon3","Demon4","Demon5","Demon6","Demon7","Demon8","Demon9","Demon10","Demon11","Demon12","Demon13","Demon14","Demon15","Demon16","Demon17","Demon18","Demon19","Demon20","Demon21","Demon22","Demon23","Demon24","Demon25"},["Dragoon"]={"Dragoon1","Dragoon2","Dragoon3","Dragoon4","Dragoon5","Dragoon6"},["Summoner"]={"Summoner1","Summoner2","Summoner3","Summoner4"},["Warlord"]={"Warlord1","Warlord2","Warlord3","Warlord4"}}
+   local s={["DualWielder"]={"CrossSlash1","CrossSlash2","CrossSlash3","CrossSlash4","CrossSlash5","CrossSlash6"}}
+   local t={["DualWielder"]={"DualWieldUltimateHit1","DualWieldUltimateHit2","DualWieldUltimateHit3","DualWieldUltimateHit4","DualWieldUltimateHit5","DualWieldUltimateHit6","DualWieldUltimateHit7","DualWieldUltimateHit8"}}
+   local u=0;
+   local v=0;
+   local w=0;local x=360;
+   local y=5;local z=0;
+   local A=true;
+   local B=5/64;
+   local C=r[q]
+   local D=s[q]
+   local E=t[q]
+   local F,G,H=nil,nil,9/64;
+   local I=g.Character.LowerTorso.Root.C0;d:SetCore("SendNotification",{Title="Loading",Duration=3,Text="Please wait",Icon="https://assetgame.roblox.com/Game/Tools/ThumbnailAsset.ashx?aid="..'2727067538'.."&fmt=png&wd=420&ht=420"})wait(2)
+   local J={Toggleska=false,Togglespa=false,Toggleshs=false,Togglesaf=false,Togglescd=false,Togglesnc=false,Togglesij=false,Togglesenv=false,Togglesrl=false,Togglesrr=false,Togglescs=true,Togglesegg=false,Togglessnl=false,Togglessl=false,Togglesbob=false,Togglesad=false}
+   local K='WorldZero-TwisT'coroutine.wrap(function()
+      if readfile and isfile(("%s.json"):format(K))
+         then J=e:JSONDecode(readfile(("%s.json"):format(K)))
+      else writefile(("%s.json"):format(K),e:JSONEncode(J))messageboxasync('Wrote settings to workspace, edit the \''..K..'\' file to change settings. Delete file if problems occur','Setting File Path',0x40000)end end)()
+   local function L()
+      if writefile 
+         then writefile(("%s.json"):format(K),e:JSONEncode(J))end end;
+   local M={["Berserker"]={Berserker1={last=0,cooldown=1/2},Berserker2={last=0,cooldown=1/2},Berserker3={last=0,cooldown=1/2},Berserker4={last=0,cooldown=1/2},Berserker5={last=0,cooldown=1/2},Berserker6={last=0,cooldown=1/2},Fissure1={last=0,cooldown=10},Fissure2={last=0,cooldown=10},FissureErupt1={last=0,cooldown=10},FissureErupt2={last=0,cooldown=10},FissureErupt3={last=0,cooldown=10},FissureErupt4={last=0,cooldown=10},FissureErupt5={last=0,cooldown=10},FissureErupt6={last=0,cooldown=10},FissureErupt7={last=0,cooldown=10},FissureErupt8={last=0,cooldown=10}},["Paladin"]={Paladin1={last=0,cooldown=1/2},Paladin2={last=0,cooldown=1/2},Paladin3={last=0,cooldown=1/2},Paladin4={last=0,cooldown=1/2},LightPaladin1={last=0,cooldown=3/4},LightPaladin2={last=0,cooldown=3/4},LightPaladin3={last=0,cooldown=3/4},LightPaladin4={last=0,cooldown=3/4}}}
+   local N={["Mage"]={ArcaneBlast={last=0,cooldown=5},ArcaneWave1={last=0,cooldown=8},ArcaneWave2={last=0,cooldown=8},ArcaneWave3={last=0,cooldown=8},ArcaneWave4={last=0,cooldown=8},ArcaneWave5={last=0,cooldown=8},ArcaneWave6={last=0,cooldown=8},ArcaneWave7={last=0,cooldown=8},ArcaneWave8={last=0,cooldown=8},ArcaneWave9={last=0,cooldown=8},ArcaneBlastAOE={last=0,cooldown=15}},["IcefireMage"]={IcySpikes1={last=0,cooldown=6},IcySpikes2={last=0,cooldown=6},IcySpikes3={last=0,cooldown=6},IcySpikes4={last=0,cooldown=6},IcySpikes5={last=0,cooldown=6},IcefireMageFireball={last=0,cooldown=10},IcefireMageFireballBlast={last=0,cooldown=10},LightningStrike1={last=0,cooldown=15},LightningStrike2={last=0,cooldown=15},LightningStrike3={last=0,cooldown=15},LightningStrike4={last=0,cooldown=15},LightningStrike5={last=0,cooldown=15},IcefireMageUltimateFrost={last=0,cooldown=20},IcefireMageUltimateMeteor1={last=0,cooldown=20},IcefireMageUltimateMeteor2={last=0,cooldown=20},IcefireMageUltimateMeteor3={last=0,cooldown=20},IcefireMageUltimateMeteor4={last=0,cooldown=20}},["DualWielder"]={DualWieldUltimateSlam={last=0,cooldown=30},DualWieldUltimateSlam1={last=0,cooldown=30},DualWieldUltimateSlam2={last=0,cooldown=30},DualWieldUltimateSlam3={last=0,cooldown=30},DualWieldUltimateSword1={last=0,cooldown=30},DualWieldUltimateSword2={last=0,cooldown=30},DualWieldUltimateSword3={last=0,cooldown=30},DualWieldUltimateSword4={last=0,cooldown=30},DualWieldUltimateSword5={last=0,cooldown=30},DualWieldUltimateSword6={last=0,cooldown=30},DualWieldUltimateSword7={last=0,cooldown=30},DualWieldUltimateSword8={last=0,cooldown=30},DualWieldUltimateSword9={last=0,cooldown=30},DualWieldUltimateSword10={last=0,cooldown=30},DualWieldUltimateSword11={last=0,cooldown=30},DualWieldUltimateSword12={last=0,cooldown=30},DualWieldUltimateSword13={last=0,cooldown=30},DualWieldUltimateSword14={last=0,cooldown=30},DualWieldUltimateSword15={last=0,cooldown=30},DualWieldUltimateSword16={last=0,cooldown=30}},["Guardian"]={RockSpikes1={last=0,cooldown=6},RockSpikes2={last=0,cooldown=6},RockSpikes3={last=0,cooldown=6},RockSpikes4={last=0,cooldown=6},RockSpikes5={last=0,cooldown=6},SlashFury1={last=0,cooldown=8},SlashFury2={last=0,cooldown=8},SlashFury3={last=0,cooldown=8},SlashFury4={last=0,cooldown=8},SlashFury5={last=0,cooldown=8},SlashFury6={last=0,cooldown=8},SlashFury7={last=0,cooldown=8},SlashFury8={last=0,cooldown=8},SlashFury9={last=0,cooldown=8},SlashFury10={last=0,cooldown=8},SlashFury11={last=0,cooldown=8},SlashFury12={last=0,cooldown=8},SlashFury13={last=0,cooldown=8},SlashFury14={last=0,cooldown=8},SlashFury15={last=0,cooldown=8},SlashFury16={last=0,cooldown=8}},["Berserker"]={AggroSlam={last=0,cooldown=5},GigaSpin1={last=0,cooldown=7},GigaSpin2={last=0,cooldown=7},GigaSpin3={last=0,cooldown=7},GigaSpin4={last=0,cooldown=7},GigaSpin5={last=0,cooldown=7},GigaSpin6={last=0,cooldown=7},GigaSpin7={last=0,cooldown=7},GigaSpin8={last=0,cooldown=7}},["Paladin"]={LightThrust1={last=0,cooldown=11},LightThrust2={last=0,cooldown=11.2}},["MageOfLight"]={MageOfLight={last=0,cooldown=1/4},MageOfLightBlast={last=0,cooldown=.3},MageOfLightCharged={last=0,cooldown=.35},MageOfLightBlastCharged={last=0,cooldown=.4}},["Demon"]={ScytheThrowDPS1={last=0,cooldown=10},ScytheThrowDPS2={last=0,cooldown=10.2},ScytheThrowDPS3={last=0,cooldown=10.4},DemonSoulAOE1={last=0,cooldown=15},DemonSoulAOE2={last=0,cooldown=15.2},DemonSoulAOE3={last=0,cooldown=15.4},DemonSoulAOE4={last=0,cooldown=15.6},DemonLifeStealDPS={last=0,cooldown=16},DemonLifeStealAOE={last=0,cooldown=16}},["Archer"]={Archer={last=0,cooldown=1/2},PiercingArrow1={last=0,cooldown=5},PiercingArrow2={last=0,cooldown=5.1},PiercingArrow3={last=0,cooldown=5.2},PiercingArrow4={last=0,cooldown=5.3},PiercingArrow5={last=0,cooldown=5.4},SpiritBomb={last=0,cooldown=10},MortarStrike1={last=0,cooldown=12},MortarStrike2={last=0,cooldown=12.2},MortarStrike3={last=0,cooldown=12.4},MortarStrike4={last=0,cooldown=12.6},MortarStrike5={last=0,cooldown=12.8},HeavenlySword={last=0,cooldown=20}},["Dragoon"]={DragoonCross1={last=0,cooldown=5},DragoonCross2={last=0,cooldown=5.2},DragoonCross3={last=0,cooldown=5.4},DragoonCross4={last=0,cooldown=5.6},DragoonCross5={last=0,cooldown=5.8},DragoonCross6={last=0,cooldown=6},DragoonCross7={last=0,cooldown=5.2},DragoonCross8={last=0,cooldown=5.4},DragoonCross9={last=0,cooldown=5.6},DragoonCross10={last=0,cooldown=5.8},DragoonDash={last=0,cooldown=10},MultiStrikeDragon1={last=0,cooldown=12},MultiStrikeDragon2={last=0,cooldown=12.2},MultiStrikeDragon3={last=0,cooldown=12.4},MultiStrikeDragon4={last=0,cooldown=12.6},MultiStrikeDragon5={last=0,cooldown=12.8},MultiStrikeDragon6={last=0,cooldown=13},DragoonFall={last=0,cooldown=12},DragoonUltimate={last=0,cooldown=30}},["Warlord"]={Piledriver1={last=0,cooldown=3},Piledriver2={last=0,cooldown=3},Piledriver3={last=0,cooldown=3},Piledriver4={last=0,cooldown=3},ChainsOfWar={last=0,cooldown=6},BlockingWarlord={last=0,cooldown=10},WarlordUltimate1={last=0,cooldown=15},WarlordUltimate2={last=0,cooldown=15},WarlordUltimate3={last=0,cooldown=15},WarlordUltimate4={last=0,cooldown=15},WarlordUltimate5={last=0,cooldown=15}}}
+   local function O()
+      if os.clock()-z>B 
+         then return true end;
+   return false end;
+   local function P(Q)j:SendKeyEvent(true,Q,false,game)end;
+   local function R(Q)j:SendKeyEvent(false,Q,false,game)end;
+   local function S(T)j:SendMouseButtonEvent(T.AbsolutePosition.X+T.AbsoluteSize.X/2,T.AbsolutePosition.Y+50,0,true,T,1)j:SendMouseButtonEvent(T.AbsolutePosition.X+T.AbsoluteSize.X/2,T.AbsolutePosition.Y+50,0,false,T,1)end;
+   i.Shared.Missions.LivesChanged.OnClientEvent:Connect(function(U)if U==0 then A=false end end)
+   local function V()
+      if not g.Character.HumanoidRootPart:FindFirstChild'BodyVelocity'
+        then local W=Instance.new'BodyVelocity'W.Velocity=Vector3.new(0,0,0)W.MaxForce=Vector3.new(900000,900000,900000)W.P=9000;W.Parent=g.Character:WaitForChild'HumanoidRootPart'end end;
+   local function X()while g.Character.HumanoidRootPart:FindFirstChild('BodyVelocity')do g.Character.HumanoidRootPart.BodyVelocity:Destroy()task.wait()end end;
+   local Y=i.Shared.VIP.IsExtraDrop:InvokeServer()
+   local function Z()local _=nil;
+   local a0=20000;
+      for a1,a2 in pairs(b.Mobs:GetChildren'')
+         do if not table.find(p,a2.Name)
+           then if a2:FindFirstChild'Collider'
+            and a2:FindFirstChild'HealthProperties'
+            and a2.HealthProperties.Health.Value>1/6 
+            and not a2:FindFirstChild'NoHealthbar'
+            then local a3=math.floor((g.Character:WaitForChild'HumanoidRootPart'.Position-a2.Collider.Position).Magnitude)
+            if a3<=a0 
+               then a0=a3;_=a2.Collider end end end end;
+   if game.PlaceId==l[1]
+      and b.Mobs:FindFirstChild'BOSSTreeEnt'
+      and b.Mobs.BOSSTreeEnt.HealthProperties.Health.Value/b.Mobs.BOSSTreeEnt.HealthProperties.MaxHealth.Value*100<=50
+         then for a4=1,3 
+      do local a5=b:WaitForChild("Pillar"..a4)
+         if a5:FindFirstChild'HealthProperties'
+            and a5.HealthProperties.Health.Value~=0
+            then _=a5.Base end end end;
+   if game.PlaceId==l[3.2]
+      and g.PlayerGui.MissionObjective.MissionObjective.Label.Text=="Destroy the Ice Barricade!"
+         then if b.MissionObjects.IceBarricade:FindFirstChild'HealthProperties'
+            and b.MissionObjects.IceBarricade.HealthProperties.Health.Value~=0 
+             then _=b.MissionObjects.IceBarricade.Part end end;
+   if game.PlaceId==l[3]
+      then if game.PlaceId==l[3]
+         then for a4=1,3 
+         do local a6=b.MissionObjects.SpikeCheckpoints:WaitForChild("Blocker"..a4)
+            if a6:FindFirstChild'HealthProperties'
+               and a6.HealthProperties.Health.Value~=0 
+                then _=a6.Part end end end end;
+   if game.PlaceId==l[4.1]
+      and b.MissionObjects.TowerLegs:FindFirstChild'Model'
+      and b.MissionObjects.TowerLegs.Model:FindFirstChild'HealthProperties'
+      then _=b.MissionObjects.TowerLegs.Model.hitbox end;
+   if game.PlaceId==l[4.1]
+      and b.Mobs:FindFirstChild'BOSSHogRider'
+      and b.Mobs.BOSSHogRider.Collider.Position.y<380 
+      then _=b.Mobs.BOSSHogRider.Collider end;
+   if game.PlaceId==l[4]
+      and b.Mobs:FindFirstChild'BOSSAnubis'
+      and b.Mobs.BOSSAnubis.HealthProperties.Health.Value/b.Mobs.BOSSAnubis.HealthProperties.MaxHealth.Value*100<=50
+      then for a1,a2 in pairs(b:GetChildren'')
+      do if a2.Name=='Gate'
+            and a2:FindFirstChild'HealthProperties'
+            and a2:IsA'Model'
+            and a2.HealthProperties.Health.Value~=0 
+            then _=a2.Base end end end;
+   if game.PlaceId==l[4]
+      and b.Mobs:FindFirstChild'BOSSAnubis'
+      then if not b.Mobs.BOSSAnubis.MobProperties.Busy:FindFirstChild'Shield'
+         then _=b.Mobs.BOSSAnubis.Collider end end;
+   if game.PlaceId==l[5.1]
+      and b.Mobs:FindFirstChild'CorruptedGreaterTree'
+      then if not b:FindFirstChild'GreaterTreeShield'
+         then _=b.Mobs.CorruptedGreaterTree.Collider end end;
+   if game.PlaceId==l[6.1]
+      and b.Mobs:FindFirstChild'DavyJones'
+      and not _ then _=b.Mobs.DavyJones.Collider end;
+   if game.PlaceId==l[6.1]
+      and b:FindFirstChild'TriggerBarrel'
+      then _=b.TriggerBarrel.Collision end;
+   if game.PlaceId==m[2]
+      and b.Mobs:FindFirstChild("BOSSKrakenMain")
+      then for a4=1,8 
+      do local a7=workspace.Mobs:FindFirstChild("BOSSKrakenArm3-Arm#"..a4)
+         if a7
+            and a7.HealthProperties.Health.Value~=0 
+            then _=a7.Subcollider.SubPrimaryPart end end end;
+   if game.PlaceId==l['Halloween']
+      and b.Mobs:FindFirstChild("FallenKingMinion")
+      and b.Mobs.FallenKingMinion.HealthProperties.Health.Value~=0 
+      then _=b.Mobs.FallenKingMinion.Collider end;
+   return _ end;local function a8()
+   local a9;
+   local aa=3000;
+   for a1,a2 
+   in pairs(b.Mobs:GetChildren'')
+   do if not table.find(p,a2.Name)
+         then if b.Mobs:FindFirstChild('SummonerSummonWeak')
+            and a2:FindFirstChild("Collider")
+            and a2:FindFirstChild("HealthProperties")
+            and a2.HealthProperties.Health.Value>8000 
+            and not a2:FindFirstChild("NoHealthbar")
+            then local ab=math.floor((b.Mobs.SummonerSummonWeak.Collider.Position-a2.Collider.Position).Magnitude)
+            if ab<=aa 
+               then aa=ab;a9=a2.Collider end end end end;
+   return a9 end;
+local function ac()task.spawn(function()
+         local DeBounce=os.clock()
+         while J.Toggleska 
+         do if not J.Toggleska
+               then break end;
+            local ad=Z()
+            if ad 
+               and g.Character:WaitForChild'HumanoidRootPart'
+               and(g.Character.HumanoidRootPart.Position-ad.Position).Magnitude<55 
+               and os.clock()-DeBounce>=5/64
+               then if ad 
+                  and ad.Parent:FindFirstChild'HealthProperties'
+                  and ad.Parent.HealthProperties.Health.Value<1/6
+                  or not A 
+                  then break end;
+               u=u+1;DeBounce=os.clock()require(i.Shared.Combat):AttackWithSkill(C[u],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()
+               if u>=#C
+                  then u=0 end end;
+            task.wait()end end)end;
+local function ae()task.spawn(function()
+         local DeBounce=os.clock()while J.Toggleska 
+         do if not J.Toggleska 
+               then break end;local ad=Z()
+            if ad 
+               and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 
+               and os.clock()-DeBounce>=9/64
+               then if ad
+                  and ad.Parent:FindFirstChild'HealthProperties'
+                  and ad.Parent.HealthProperties.Health.Value<1/6 
+                  or not A 
+                  then break end;
+               DeBounce=os.clock()u=u+1;require(i.Shared.Combat):AttackWithSkill(C[u],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()
+               if u>=#C 
+                  then u=0 end end;
+            task.wait()end end)end;
+local function af()task.spawn(function()
+         local DeBounce=os.clock()
+         while J.Toggleska
+         do if not J.Toggleska 
+               then break end;
+            local ad=Z()
+            if ad
+               and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 
+               and os.clock()-DeBounce>=9/64
+               then if ad 
+                  and ad.Parent:FindFirstChild'HealthProperties'
+                  and ad.Parent.HealthProperties.Health.Value<1/6 
+                  or not A then break end;
+               DeBounce=os.clock()u=u+1;require(i.Shared.Combat):AttackWithSkill(C[u],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait(.1)
+               if u>=#C 
+                  then u=0 end end;
+            task.wait(.1)end end)end;
+local function ag()task.spawn(function()
+         local DeBounce=os.clock()
+         while J.Toggleska 
+         do if not J.Toggleska
+               then break end;
+            local ad=Z()
+            if ad 
+               and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 
+               and os.clock()-DeBounce>=9/64 
+               then if ad and ad.Parent:FindFirstChild'HealthProperties'
+                  and ad.Parent.HealthProperties.Health.Value<1/6 
+                  or not A then break end;
+               DeBounce=os.clock()u=u+1;require(i.Shared.Combat):AttackWithSkill(C[u],ad.Position)wait(.1)
+               if u>=#C 
+                  then u=0 end end;
+            task.wait(.1)end end)end;
+local function ah()task.spawn(function()
+         while J.Toggleska 
+         do local ai=os.clock()
+            local ad=Z()
+            if ad 
+               and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<60 
+               then if ad 
+                  and ad.Parent:FindFirstChild'HealthProperties'
+                  and ad.Parent.HealthProperties.Health.Value<1/6
+                  or not A 
+                  then break end;
+               for aj,a2 in pairs(N[q])
+               do if ai-a2.last>a2.cooldown 
+                     and O()
+                     then require(i.Shared.Combat):AttackWithSkill(aj,ad.Position)a2.last=os.clock()z=os.clock()end end end;
+            task.wait()end end)end;local function ak()task.spawn(function()while J.Toggleska do local ai=os.clock()local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<60 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;for aj,a2 in pairs(M[q])do if ai-a2.last>a2.cooldown and O()then require(i.Shared.Combat):AttackWithSkill(aj,g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)a2.last=os.clock()z=os.clock()end end end;task.wait()end end)end;local function al()task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska and not A then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<500 and os.clock()-DeBounce>=6 then DeBounce=os.clock()i.Shared.Combat.Skillsets.DualWielder.AttackBuff:FireServer()i.Shared.Combat.Skillsets.DualWielder.UpdateSpeed:FireServer(0)end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 and os.clock()-DeBounce>=6 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()v=v+1;require(i.Shared.Combat):AttackWithSkill(D[v],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()if v>=#D then v=0 end;require(i.Shared.Combat):AttackWithSkill("DashStrike",g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 and os.clock()-DeBounce>=30 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()w=w+1;require(i.Shared.Combat):AttackWithSkill(E[w],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()if w>=#E then w=0 end end;task.wait()end end)end;local function am()task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 and os.clock()-DeBounce>=1/3 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()u=u+1;require(i.Shared.Combat):AttackWithSkill(C[u],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait(.1)if u>=#C then u=0 end end;task.wait(.1)end end)task.spawn(function()local an=require(i.Client.Gui.GuiScripts.Hotbar)local ao=an.GetHotbarSkillTile("","Ultimate")while J.Toggleska do if ao.cooling and not J.Toggleska then break end;local ad=Z()if ad and g.Character:FindFirstChild'Humanoid'then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 then break end;j:SendKeyEvent(true,"X",false,game)wait(1/2)j:SendKeyEvent(false,"X",false,game)end;task.wait()end end)end;local function ap()task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 and os.clock()-DeBounce>=.5 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()u=u+1;i.Shared.Combat.Attack:FireServer(C[u],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()if u>=#C then u=0 end end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<55 and os.clock()-DeBounce>=.75 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()v=v+1;require(i.Shared.Combat):AttackWithSkill(D[v],g.Character.HumanoidRootPart.Position,g.Character.HumanoidRootPart.CFrame.lookVector)wait()if v>=#D then v=0 end end;task.wait()end end)task.spawn(function()DeBounce=os.clock()local an=require(game:GetService("ReplicatedStorage").Client.Gui.GuiScripts.Hotbar)local ao=an.GetHotbarSkillTile("","Ultimate")while J.Toggleska do if ao.cooldownTimer>20 and not J.Toggleska then break end;if os.clock()-DeBounce>=2 then DeBounce=os.clock()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()i.Shared.Combat.Skillsets.Demon.Demonic:FireServer()wait()if ao.cooldownTimer>1 and not J.Toggleska then break end;i.Shared.Combat.Skillsets.Demon.Ultimate:FireServer()end;task.wait()end end)end;local function aq()if q=='Archer'then F,G,y=30,26,6 end;task.spawn(function()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()local ar=require(game.ReplicatedStorage.Client.Actions):IsOnCooldown("Ultimate")if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<80 and b.Characters[g.Name].Properties.BackSwordCount.Value==6 then if ad and ad.Parent.HealthProperties.Health.Value<1/6 or ar then break end;DeBounce=os.clock()F,G,y=3/64,16,66;wait(1)i.Shared.Combat.Skillsets.Archer.Ultimate:FireServer(ad.Position)wait(1)F,G,y=26,26,6 end;task.wait()end end)end;local function as()task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<70 and os.clock()-DeBounce>=9/64 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()u=u+1;require(i.Shared.Combat):AttackWithSkill(C[u],ad.Position)wait(1/3)if u>=#C then u=0 end end;task.wait(.1)end end)task.spawn(function()local DeBounce=os.clock()local an=require(game:GetService("ReplicatedStorage").Client.Gui.GuiScripts.Hotbar)local ao=an.GetHotbarSkillTile("","Skill1")while J.Toggleska do if ao.cooldownTimer>1 and not J.Toggleska then break end;local ad=Z()if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;if ad and os.clock()-DeBounce>=8 then DeBounce=os.clock()require(i.Shared.Combat.Skillsets.Summoner):Summon(ad.Position)end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and(g.Character:WaitForChild'HumanoidRootPart'.Position-ad.Position).Magnitude<50 and os.clock()-DeBounce>=10 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()i.Shared.Combat.Skillsets.Summoner.SoulHarvest:FireServer(ad.Position)end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and os.clock()-DeBounce>=30 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()require(i.Shared.Combat.Skillsets.Summoner):Ultimate(ad.Position)end;task.wait()end end)task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=a8()if ad and b.Mobs:FindFirstChild('SummonerSummonWeak')then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;local at=(b.Mobs.SummonerSummonWeak.Collider.Position-ad.Position).Magnitude;if at<8 and g.Character:WaitForChild'HumanoidRootPart'and os.clock()-DeBounce>=2 then DeBounce=os.clock()require(i.Shared.Combat.Skillsets.Summoner):ExplodeSummons()end end;task.wait()end end)end;local function au()task.spawn(function()local DeBounce=os.clock()while J.Toggleska do if not J.Toggleska then break end;local ad=Z()if ad and g.PlayerGui.BossHealthbar.BossHealthbar.Panels:FindFirstChild'Panel'and os.clock()-DeBounce>=1/4 then if ad and ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 or not A then break end;DeBounce=os.clock()require(i.Shared.Combat.Skillsets.Warlord):Block()end;task.wait()end end)end;b.Characters[g.Name].HealthProperties.Health:GetPropertyChangedSignal("Value"):Connect(function()if b.Characters[g.Name].HealthProperties.Health.Value/b.Characters[g.Name].HealthProperties.MaxHealth.Value*100<50 then local av,aw;av,aw=F,G;wait(2)F,G,H,y=50,40,1,3;wait(20)F,G=av,aw end end)for a1,a2 in pairs(n)do if game.PlaceId==a2 then G,H,y,J.Togglesaf=15,16,8,false end end;
+local ax=loadstring(game:HttpGet("https://raw.githubusercontent.com/neonixran/MaterialLua/master/Module.lua"),"Material Lua")()local ay=ax:Load({Title='World Zero v3.6',Position="Left",Style=3,SizeX=190,SizeY=510,Theme='Dark',RichText=true,TextColor=Color3.fromRGB(233,160,255),Overrides={MainFrame=Color3.fromRGB(35,35,35)}})local az=ay:New({Title='Main'})local aA=ay:New({Title='Misc'})local aB=ay:New({Title='Menu'})local aC=ay:New({Title='Perks'})local aD=ay:New({Title='Settings'})local aE=az:Toggle({Text='  KillAura',Enabled=J.Toggleska,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Toggleska=aF;L()if q=='Mage'then ag()ah()elseif q=='Swordmaster'then ae()elseif q=='Defender'then af()elseif q=='DualWielder'then ae()al()ah()elseif q=='Berserker'then ak()ah()elseif q=='Guardian'then am()ah()elseif q=='Paladin'then ak()ah()elseif q=='IcefireMage'then ag()ah()elseif q=='MageOfLight'then ah()elseif q=='Dragoon'then ae()ah()elseif q=='Demon'then ah()ap()elseif q=='Archer'then ah()aq()elseif q=='Summoner'then as()elseif q=='Warlord'then ac()ah()au()end end})local aG=aA:Toggle({Text='  MoLPassive',Enabled=J.Toggleshs,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Toggleshs=aF;L()task.spawn(function()while J.Toggleshs do if not J.Toggleshs then break end;if b.Characters[g.Name].HealthProperties.Health.Value/b.Characters[g.Name].HealthProperties.MaxHealth.Value*100<98 then for a1,a2 in pairs(game.Players:GetPlayers'')do local aH=a2;i.Shared.Combat.Skillsets.MageOfLight.HealCircle:FireServer(aH)end end;task.wait(12)end end)task.spawn(function()while J.Toggleshs do if not J.Toggleshs then break end;if b.Characters[g.Name].HealthProperties.Health.Value/b.Characters[g.Name].HealthProperties.MaxHealth.Value*100<15 then break end;for a1,a2 in pairs(game.Players:GetPlayers'')do local aH=a2;i.Shared.Combat.Skillsets.MageOfLight.Barrier:FireServer(aH)end;task.wait(43)end end)end})aA:Toggle({Text='  ReduceLag',Enabled=J.Togglesrl,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesrl=aF;L()for a1,a2 in pairs(b:GetDescendants'')do if a2:IsA'BasePart'and not a2.Parent:FindFirstChild'Humanoid'then a2.Material=Enum.Material.SmoothPlastic;if a2:IsA'Texture'then task.defer(a2.Destroy,a2)end end end;b.DescendantAdded:Connect(function(aI)if aI:IsA'BasePart'and not aI.Parent:FindFirstChild'Humanoid'then aI.Material=Enum.Material.SmoothPlastic;if aI:IsA'Texture'then task.defer(aI.Destroy,aI)end end end)end})local aJ=aA:Toggle({Text='  NoCutScene',Enabled=J.Togglescs,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglescs=aF;L()local aK=require(i.Client.Camera)local aL=g.PlayerGui.CutsceneUI;aL:GetPropertyChangedSignal("Enabled"):Connect(function()if aL.Enabled then aK:SkipCutscene()end end)end})aA:Toggle({Text='  DeleteEggs',Enabled=J.Togglesegg,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesegg=aF;L()local aM=i.Profiles[g.Name].Inventory.Items;aM.ChildAdded:Connect(function(aN)if aN.Name:lower():find("egg")then task.defer(aN.Destroy,aN)end end)aM.ChildAdded:Connect(function()for a1,a2 in pairs(aM:GetChildren'')do if table.find(o,a2.Name)then task.defer(a2.Destroy,a2)end end end)end})aA:Toggle({Text='  SellTier[1-4]',Enabled=J.Togglessnl,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglessnl=aF;L()local aM=i.Profiles[g.Name].Inventory.Items;local aO;aO=aM.ChildAdded:connect(function()for a1,a2 in pairs(aM:GetDescendants'')do if a2:FindFirstChild'Level'and a2:FindFirstChild'UpgradeLimit'and not a2:FindFirstChild'Perk3'then i.Shared.Drops.SellItems:InvokeServer({a2})end end end)if not J.Togglessnl then aO:Disconnect()end end})local aP=aA:Toggle({Text='  AutoSw-[BoB]',Enabled=J.Togglesbob,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesbob=aF;L()local aQ,aR;aQ=g.PlayerGui.BossHealthbar.BossHealthbar.Panels.ChildAdded:connect(function()for a1,a2 in pairs(i.Profiles[g.Name].Equip.Offhand:GetDescendants'')do if a2.Name=='Perk3'and a2.Value=="TestTier5"then if g.PlayerGui.BossHealthbar.BossHealthbar.Panels:FindFirstChild'Panel'then i.Shared.Settings.OffhandPerksActive:FireServer(true)else i.Shared.Settings.OffhandPerksActive:FireServer(false)end end end;for a1,a2 in pairs(i.Profiles[g.Name].Equip.Primary:GetDescendants'')do if a2.Name=='Perk3'and a2.Value=="TestTier5"then if g.PlayerGui.BossHealthbar.BossHealthbar.Panels:FindFirstChild'Panel'then i.Shared.Settings.OffhandPerksActive:FireServer(false)else i.Shared.Settings.OffhandPerksActive:FireServer(true)end end end end)aR=g.PlayerGui.BossHealthbar.BossHealthbar.Panels.ChildRemoved:connect(function()for a1,a2 in pairs(i.Profiles[g.Name].Equip.Offhand:GetDescendants'')do if a2.Name=='Perk3'and a2.Value=="TestTier5"then i.Shared.Settings.OffhandPerksActive:FireServer(false)end end;for a1,a2 in pairs(i.Profiles[g.Name].Equip.Primary:GetDescendants'')do if a2.Name=='Perk3'and a2.Value=="TestTier5"then i.Shared.Settings.OffhandPerksActive:FireServer(true)end end end)if not J.Togglesbob then aQ:Disconnect()aR:Disconnect()end end})aA:Toggle({Text='  AvoidDamage',Enabled=J.Togglesad,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesad=aF;L()local aO=b.ChildAdded:Connect(function(aS)for a1,aT in pairs(n)do if game.PlaceId~=aT then for a1,a2 in pairs(i.Shared.Effects.Models:GetChildren'')do if aS.Name==a2.Name then if aS:FindFirstChildWhichIsA('BasePart')then if q=='Berserker'or q=='Dragoon'or q=='Warlord'then local av,aw;av,aw=F,G;wait(1.8)F,G,H,y,x=.1,15,1/2,3,800;for a4=1,60 do F=F+1/10 end;wait(20)F,G,H,y,x=av,aw,9/64,4,360 elseif q=='DualWielder'or q=='Demon'or q=='Guardian'or q=='Paladin'then local av,aw;av,aw=F,G;wait(1.8)F,G,H,y,x=.1,14,1/2,10,600;wait(20)F,G,H,y,x=av,aw,9/64,4,360 elseif q=='Swordmaster'or q=='Defender'then local av,aw;av,aw=F,G;wait(1.5)F,G,H,y,x=.1,14,1/2,2,2;wait(20)F,G,H,y,x=av,aw,9/64,4,360 elseif q=='Mage'or q=='IcefireMage'or q=='MageOfLight'or q=='Summoner'then local av,aw;av,aw=F,G;wait(1.5)F,G,H,y,x=36,36,1/2,5,360;wait(20)F,G,H,y,x=av,aw,9/64,4,360 end end end end end end end)if not J.Togglesad then aO:Disconnect()end end})aA:Button({Text='  Flip-Up/Down',TextColor=Color3.fromRGB(222,248,107),Callback=function(aU)aU=not aU;if aU then g.Character.LowerTorso.Root.C0=I else g.Character.LowerTorso.Root.C0=g.Character.LowerTorso.Root.C0*CFrame.Angles(0,0,math.pi)*CFrame.new(0,-1,0)end end})aA:Button({Text='  Unstuck-SOS',TextColor=Color3.fromRGB(222,248,107),Callback=function()X()end})local aV={}SettingFileName='WorldZero-Perk2Keep'coroutine.wrap(function()if readfile and isfile(("%s.json"):format(SettingFileName))then aV=e:JSONDecode(readfile(("%s.json"):format(SettingFileName)))end end)()local function aW()if writefile then writefile(("%s.json"):format(SettingFileName),e:JSONEncode(aV))end end;local aX=require(game:GetService("ReplicatedStorage").Shared.Gear.GearPerks)local aY=aC:DataTable({Text="  Perks2Keep",TextColor=Color3.fromRGB(222,248,107),Callback=function(aZ,aF)if aF then aW()table.insert(aV,aZ)else table.remove(aV,table.find(aV,aZ))aW()end end})aC:Toggle({Text='  Sell[Legendary]',Enabled=J.Togglessl,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglessl=aF;L()for a1,a_ in pairs(aV)do print(a_)local aM=i.Profiles[g.Name].Inventory.Items;local aO;aO=aM.DescendantAdded:connect(function(b0,b1,b2)if b0.Name=='Perk1'then if not table.find(aV,b0.Value)then if b1.Name=='Perk2'then if not table.find(aV,b1.Value)then if b2.Name=='Perk3'then if not table.find(aV,b2.Value)then i.Shared.Drops.SellItems:InvokeServer({b2.Parent})end end end end end end end)if not J.Togglessl then aO:Disconnect()end end end})for a1,a2 in pairs(aX)do Key=a2.Name;aY:GetOptions()[Key]=false end;aY:SetOptions(aY:GetOptions())local b3=false;az:Toggle({Text='  PetSkill',TextColor=Color3.fromRGB(255,187,109),Enabled=b3,Callback=function(aF)b3=aF;L()while b3 do P(Enum.KeyCode.One)wait()R(Enum.KeyCode.One)wait(15)end end})local b4=az:Toggle({Text='  FarmMob',Enabled=J.Togglesaf,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesaf=aF;L()if q=='Mage'or q=='IcefireMage'or q=='MageOfLight'or q=='Summoner'then F,G,y=36,30,6 elseif q=='Swordmaster'or q=='Defender'or q=='Berserker'or q=='Paladin'or q=='Guardian'or q=='Dragoon'or q=='Warlord'then F,G,y=.1,15,5 elseif q=='Demon'or q=='DualWielder'then F,G,y=.1,14,5 end;if not J.Togglesaf then X()g.Character:WaitForChild'HumanoidRootPart'.CanCollide=true end;task.spawn(function()local b5=TweenInfo.new(H,Enum.EasingStyle.Exponential,Enum.EasingDirection.Out)while true do local ad=Z()if not J.Togglesaf or not A then break end;if J.Togglesaf and ad and A then V()g.Character:WaitForChild'HumanoidRootPart'.CanCollide=false;if ad.Parent.Name:find'Boss'then G=G+6 end;if ad.Parent:FindFirstChild'HealthProperties'and ad.Parent.HealthProperties.Health.Value<1/6 then break end;local b6=x*(tick()%y)/y;f:Create(g.Character.HumanoidRootPart,b5,{CFrame=CFrame.new(ad.Position)*CFrame.Angles(0,math.rad(b6),0)*CFrame.new(0,F,G)}):Play()end;c.Heartbeat:Wait()end end)task.spawn(function()if J.Togglesaf and A then if b:WaitForChild'MissionObjects':FindFirstChild'MissionStart'then for a1,a2 in pairs(b.MissionObjects.MissionStart:GetDescendants'')do if a2:IsA'TouchTransmitter'and a2.Parent then a2.Parent.CFrame=g.Character.HumanoidRootPart.CFrame end end end;for a1,a2 in pairs(k:GetChildren'')do if a2:IsA'BasePart'and a2.Name=="Collider"then a2.Touched:Connect(function(b7)if b7:IsA'BasePart'and b7.Transparency~=1 then if b7.Parent~=k then local b8=.3;b7.Transparency=b8;local b9=Color3.fromRGB(140,140,140)b7.Color=b9 end end end)end end end end)end})az:Toggle({Text='  GetDrops',Enabled=J.Togglescd,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglescd=aF;L()task.spawn(function()local ba=require(i.Shared.Drops)
+               local bb=getupvalue(ba.Start,4)
+               while J.Togglescd 
+               do if not J.Togglescd 
+                     then break end;
+                  for a4,a2 in pairs(bb)
+                  do a2.model:Destroy()a2.followPart:Destroy()i.Shared.Drops.CoinEvent:FireServer(a2.id)table.remove(bb,a4)end;
+                  task.wait(1/3)end end)end})az:Toggle({Text='  NoClip',Enabled=J.Togglesnc,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesnc=aF;L()g.Character.HumanoidRootPart.CanCollide=true;
+         if J.Togglesnc 
+            then g.Character.HumanoidRootPart.CanCollide=false end end})
+local bc=false;
+az:Toggle({Text='  HeadLamp',Enabled=bc,TextColor=Color3.fromRGB(255,187,109),Callback=function(aF)bc=aF;
+         L()if bc then local bd;
+            local be=Instance.new('PointLight',g.Character.Head)be.Brightness=.8;be.Range=180;bd.Changed:connect(function()bd.Brightness=1;
+                  bd.ClockTime=12;bd.FogEnd=1000000;bd.GlobalShadows=true;
+                  bd.Ambient=Color3.new(1,1,1)bd.ColorShift_Top=Color3.new(1,1,1)bd.ColorShift_Bottom=Color3.new(1,1,1)end)
+         else k.Head.PointLight:Destroy()end end})az:Toggle({Text='  InfiniteJump',Enabled=J.Togglesij,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesij=aF;
+         L()local function bf(bg,bh)
+            if bg~=nil then bh(bg)end end;
+         h.InputBegan:connect(function(bi)
+               if J.Togglesij 
+                  and bi.UserInputType==Enum.UserInputType.Keyboard 
+                  and bi.KeyCode==Enum.KeyCode.Space 
+                  then bf(g.Character.Humanoid,function(self)
+                        if self:GetState()==Enum.HumanoidStateType.Jumping or self:GetState()==Enum.HumanoidStateType.Freefall 
+                           then bf(self.Parent.HumanoidRootPart,function(self)self.Velocity=Vector3.new(0,100,0)end)end end)end end)bf()end})local bj=false;
+az:Toggle({Text='  Levitating',Enabled=bj,TextColor=Color3.fromRGB(255,187,109),Callback=function(aF)bj=aF;
+         L()local function bk(bl,bm)for bn,bo in pairs(bl)do bm(bo,bn)end end;
+         local function bp(bq)local bg=Instance.new(bq)return function(br)bk(br,function(bo,bs)bg[bs]=bo end)return bg end end;do local bt=nil;while bj do if not bt then bt=bp"Part"{Parent=workspace.CurrentCamera,Name="LP",Transparency=1,Size=Vector3.new(3,1,3),Anchored=true}end;if k then bt.CFrame=g.Character.HumanoidRootPart.CFrame-Vector3.new(0,3.6,0)end;task.wait()end end end})az:Separator()local bu=getrawmetatable(game)local bv=bu.__index;local bw=bu.__newindex;setreadonly(bu,false)local bx=g.Character.Humanoid;local by=bx.WalkSpeed;local bz=bx.JumpPower;bu.__newindex=newcclosure(function(bl,bA,a2)if checkcaller()then return bw(bl,bA,a2)elseif bl:IsA'Humanoid'and bA=="WalkSpeed"then a2=tonumber(a2)if not a2 then a2=0 end;by=a2 elseif bl:IsA'Humanoid'and bA=="JumpPower"then a2=tonumber(a2)if not a2 then a2=0 end;bz=a2 else return bw(bl,bA,a2)end end)bu.__index=newcclosure(function(bl,bA)if checkcaller()then return bv(bl,bA)elseif bl:IsA'Humanoid'and bA=="WalkSpeed"then return by elseif bl:IsA'Humanoid'and bA=="JumpPower"then return bz else return bv(bl,bA)end end)setreadonly(bu,true)az:Slider({Text="  WalkSpeed",Min=16,Max=120,Default=50,TextColor=Color3.fromRGB(241,161,12),Callback=function(bo)g.Character.Humanoid.WalkSpeed=bo end})az:Slider({Text="  JumpPower",Min=70,Max=160,Default=80,TextColor=Color3.fromRGB(241,161,12),Callback=function(bo)g.Character.Humanoid.JumpPower=bo end})az:Toggle({Text='  RepeatRaid',Enabled=J.Togglesrr,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesrr=aF;L()for a1,a2 in pairs(n)do if game.PlaceId~=a2 and J.Togglesrr then local bB=require(i.Shared.Missions)local bC=g.PlayerGui.MissionRewards.MissionRewards;if bC.Playerlist.Visible then bB:SetLeaveChoice(g,true)bB:NotifyReadyToLeave(g)end;bC.RaidClear:GetPropertyChangedSignal("Text"):Connect(function()if bC.RaidClear.Text=="T O W E R    F A I L U R E"then bB:SetLeaveChoice(g,true)bB:NotifyReadyToLeave(g)end end)bC.RaidClear:GetPropertyChangedSignal("Text"):Connect(function()if bC.RaidClear.Text=="D U N G E O N    F A I L U R E"then bB:SetLeaveChoice(g,true)bB:NotifyReadyToLeave(g)end end)g.PlayerGui.TowerFinish.TowerFinish.Description.Overlay:GetPropertyChangedSignal("Text"):Connect(function()if g.PlayerGui.TowerFinish.TowerFinish.Description.Overlay.Text=="Collect your rewards! (10)"then bB:SetLeaveChoice(g,true)bB:NotifyReadyToLeave(g)end end)bC.Playerlist.Header:GetPropertyChangedSignal("Visible"):Connect(function()wait(1)S(bC.Playerlist.WithParty.TextLabel)end)end end end})az:Toggle({Text='  ReloadOnHop',Enabled=J.Togglesenv,TextColor=Color3.fromRGB(222,248,107),Callback=function(aF)J.Togglesenv=aF;L()game:GetService'Players'.PlayerRemoving:connect(function(bD)if bD==g and J.Togglesenv then if syn then syn.queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/HeiKe2022/wz-v3.6/main/combine.lua"))()')elseif fluxus then fluxus.queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/HeiKe2022/wz-v3.6/main/combine.lua"))()')else queue_on_teleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/HeiKe2022/wz-v3.6/main/combine.lua"))()')end end end)end})local bE=az:Label({Text="IDLE",XAlignment="Center",TextColor=Color3.fromRGB(253,236,2)})aB:Button({Text='   Bank',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.Bank):Toggle()end})aB:Button({Text='   Upgrade',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.ItemUpgrade):Toggle()end})aB:Button({Text='   Zero Altar',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.Fusion):Open()end})aB:Button({Text='   Way Stones',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.Waystones):Open()end})aB:Button({Text='   World Menu',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.WorldTeleport):Toggle()end})aB:Button({Text='   Dungeon Menu',TextColor=Color3.fromRGB(222,248,107),Callback=function()require(i.Client.Gui.GuiScripts.MissionSelect):Toggle()end})aD:GuiSettings({Theme=false,Options=true,Rejoin=false})i.Shared.Missions.MissionStart.OnClientEvent:Connect(function()bE:SetText("Mission Started")end)i.Shared.Missions.MissionFinished.OnClientEvent:Connect(function()bE:SetText("Mission Finished")end)for a1,a2 in pairs(l)do if game.PlaceId==a2 then local bC=g.PlayerGui.MissionRewards.MissionRewards;bC.Countdown:GetPropertyChangedSignal("Text"):Connect(function()if bC.Countdown.Text=="Pick up your gold! (1)"then wait(1.8)repeat S(bC.Chests.Box1.ChestImage.Select)wait()until bC.OpenChest.Countdown.text=='0'end end)bC.OpenChest.Countdown:GetPropertyChangedSignal("Text"):Connect(function()if bC.OpenChest.Countdown.Text=='0'then wait(3.8)S(bC.OpenChest.Next.TextLabel)end end)bC.Chests.Box1.ChestImage.ChildAdded:Connect(function(bF)if bF.Name=='ViewportFrame'and not Y then wait(6)S(bC.OpenChest.Next.TextLabel)else S(bC.Chests.Box2.ChestImage.VIP.TextLabel)wait(1.5)repeat S(bC.Chests.Box2.ChestImage.Select)wait()until bC.OpenChest.Countdown.text=='0'end end)bC.Chests.Box2.ChestImage.ChildAdded:Connect(function(bF)if bF.Name=='ViewportFrame'and Y then wait(3)S(bC.OpenChest.Next.TextLabel)end end)end end;if game.PlaceId==l[2.1]then b.MissionObjects.ChildRemoved:Connect(function(bG)if bG.Name=="MissionStart"then wait(1)b.MissionObjects.Room1Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.MissionObjects.Room1Trigger.ChildRemoved:Connect(function()wait(2)b.MissionObjects.Room2Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end)b.MissionObjects.Room2Trigger.ChildRemoved:Connect(function()wait(2)b.MissionObjects.Room3Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end)b.MissionObjects.Room3Trigger.ChildRemoved:Connect(function()wait(2)b.MissionObjects.Room4Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end)b.MissionObjects.Room4Trigger.ChildRemoved:Connect(function()wait(6)g.Character.HumanoidRootPart.CFrame=b.MissionObjects.WallsTrigger.CFrame;wait(3)g.Character.HumanoidRootPart.CFrame=b.MissionObjects.WallsFinalTrigger.CFrame end)g.PlayerGui.MissionObjective.MissionObjective.Label:GetPropertyChangedSignal("Text"):Connect(function()if g.PlayerGui.MissionObjective.MissionObjective.Label.Text=="Take the royal crystal! (0 / 1)"then g.Character.HumanoidRootPart.CFrame=CFrame.new(1192.15894,-226.738449,110.141144)end end)end;if game.PlaceId==l[3.1]then b.MissionObjects.ChildRemoved:Connect(function(bH)if bH.Name=='ProgressionBlocker1'then b.MissionObjects.CaveTrigger.CFrame=g.Character.HumanoidRootPart.CFrame end end)end;local function bI()pcall(function()for a1,a2 in pairs(b.MissionObjects.TowerLegs:GetDescendants'')do if a2.Name=='hitbox'and not a2.CanCollide then a2.Parent:Destroy()end end end)end;if game.PlaceId==l[4.1]then b.MissionObjects.TowerLegs.DescendantRemoving:Connect(bI)end;if game.PlaceId==l[4]and b:FindFirstChild'Gate'then b.Mobs.BOSSAnubis.HealthProperties.Health:GetPropertyChangedSignal("Value"):Connect(function()if b.Mobs.BOSSAnubis.HealthProperties.Health.Value/b.Mobs.BOSSAnubis.HealthProperties.MaxHealth.Value*100==50 then g.Character.HumanoidRootPart.CFrame=b.MissionObjects.Boss1 end end)end;if game.PlaceId==l[6.1]then b.MissionObjects.ChildRemoved:Connect(function(bG)if bG.Name=="MissionStart"then wait(1)b.MissionObjects.Area1Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.MissionObjects.Area2Trigger.ChildAdded:Connect(function(bJ)if bJ:IsA("TouchTransmitter")then wait(1)b.MissionObjects.Area2Trigger.CFrame=g.Character.HumanoidRootPart.CFrame end end)end;if game.PlaceId==l[7.1]then b.MissionObjects.ChildRemoved:Connect(function(bG)if bG.Name=="MissionStart"then wait(1)b.MissionObjects.FakeBoss.CFrame=g.Character.HumanoidRootPart.CFrame end end)end;if b:FindFirstChild'MissionObjects'and game.PlaceId~=l[2.1]and game.PlaceId~=l[6.1]then b.MissionObjects.DescendantAdded:Connect(function(bJ)if bJ:IsA'TouchTransmitter'and not bJ.Parent.Parent.Name:lower():find'damage'and not bJ.Parent.Name:lower():find'killpart'and not bJ.Parent.Name:find'0'and not bJ.Parent.Parent.Name:find'Darts'and not bJ.Parent.Parent.Name:find'Spikes'and bJ.Parent~='MinibossExit'and bJ.Parent.Parent~='MinibossExitModel'then wait(2)pcall(function()bJ.Parent.CFrame=g.Character.HumanoidRootPart.CFrame end)end end)b.MissionObjects.DescendantAdded:Connect(function(bK)if bK:IsA'TouchTransmitter'and bK.Parent.Name:find'Trigger'then wait(3/2)pcall(function()bK.Parent.CFrame=g.Character.HumanoidRootPart.CFrame end)end end)end;if game.PlaceId==l['Halloween']then b.ChildAdded:Connect(function(bL)if bL.Name=='CureFountainFallenKing'and bL:FindFirstChild'ArcanePanel'then b4:SetState(false)wait(2)g.Character.HumanoidRootPart.CFrame=b.CureFountainFallenKing.ArcanePanel.CFrame;wait(1)V()b4:SetState(true)end end)end;for a1,a2 in pairs(m)do if game.PlaceId==a2 then b.MissionObjects.ChildRemoved:Connect(function(bG)if bG.Name=="MissionStart"then wait(2)b.MissionObjects.WaveStarter.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.MissionObjects.ChildAdded:Connect(function(bM)if bM.Name=="MinibossExitModel"then wait(2)b.MissionObjects.MinibossExitModel.Part.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.MissionObjects.ChildAdded:Connect(function(bN)if bN.Name=="MinibossExit"then wait(3)b4:SetState(false)b.MissionObjects.MinibossExit.CFrame=g.Character.HumanoidRootPart.CFrame;wait()V()b4:SetState(true)end end)end end;for a1,bO in pairs(m)do if game.PlaceId==bO then b.ChildAdded:Connect(function(bP)if bP.Name=='RaidChestGold'then b.RaidChestGold.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame;wait(3.8)bP:Destroy()end end)b.ChildAdded:Connect(function(bQ)if bQ.Name=='RaidChestSilver'then b.RaidChestSilver.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame;wait(3.8)bQ:Destroy()end end)b.ChildAdded:Connect(function(bR)if bR.Name=='AtlanticChest'then for a1,a2 in pairs(b:GetChildren'')do if a2.ClassName=="Model"and a2.Name=="AtlanticChest"then a2.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end end end)b.ChildAdded:Connect(function(bS)if bS.Name=='VolcanicChestTower'then for a1,a2 in pairs(b:GetChildren'')do if a2.ClassName=="Model"and a2.Name=="VolcanicChestTower"then a2.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end end end)b.ChildRemoved:Connect(function(bP)if bP.Name=='RaidChestGold'and b:FindFirstChild'RaidChestGold'then b.RaidChestGold.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.ChildRemoved:Connect(function(bQ)if bQ.Name=='RaidChestSilver'and b:FindFirstChild'RaidChestSilver'then b.RaidChestSilver.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end)b.ChildRemoved:Connect(function(bR)if bR.Name=='AtlanticChest'then for a1,a2 in pairs(b:GetChildren'')do if a2.ClassName=="Model"and a2.Name=="AtlanticChest"and b:FindFirstChild'AtlanticChest'then a2.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end end end)b.ChildRemoved:Connect(function(bS)if bS.Name=='VolcanicChestTower'then for a1,a2 in pairs(b:GetChildren'')do if a2.ClassName=="Model"and a2.Name=="VolcanicChestTower"and b:FindFirstChild'VolcanicChestTower'then a2.ChestBase.CFrame=g.Character.HumanoidRootPart.CFrame end end end end)end end;if getconnections then for a4=1,#getconnections(g.Idled)do getconnections(g.Idled)[a4]:Disable()end else g.Idled:Connect(function()VirtualUser:Button2Down(Vector2.new(0,0),CurrentCamera.CFrame)wait(1)VirtualUser:Button2Up(Vector2.new(0,0),CurrentCamera.CFrame)end)end;g.CharacterAdded:connect(function()task.wait(1/5)local W=Instance.new'BodyVelocity'W.Velocity=Vector3.new(0,0,0)W.Parent=g.Character:WaitForChild'HumanoidRootPart'end)local bT;bT=hookmetamethod(game,"__index",function(bl,bA,a2)if not checkcaller()and bl==g and bA=="CameraMaxZoomDistance"and a2==30 then return 60 end;return bT(bl,bA,a2)end)g.CameraMaxZoomDistance=60;g.CameraMinZoomDistance=60;g.CameraMinZoomDistance=5;for a1,a2 in pairs(m)do if game.PlaceId==a2 then a.PurchasePrompt.ProductPurchaseContainer.Animator.ChildAdded:Connect(function()pcall(function()a.PurchasePrompt.ProductPurchaseContainer.Animator.Prompt.Visible=false end)end)a.PurchasePrompt.ChildAdded:Connect(function(bU)if bU.Name=="RobuxUpsellContainer"then wait(1/3)bU:Destroy()end end)end end;setfflag("InGameMenuV1LeaveToHome","FALSE")setfflag("InGameMenuV1ExitModal","FALSE")game.NetworkClient.ChildRemoved:Connect(function()game:GetService'GuiService':ClearError()bE:SetText("   Kicked | Disconnected")end)
+if J.Toggleska then aE:SetState(true)end;
+if J.Togglescs then aJ:SetState(true)end;
+if q~='MageOfLight'then aG:SetVisible(false)aG:SetDisable(true)end;if not q=='Warlord'or q=='DualWielder'or q=='Paladin'then aP:SetDisable(true)end
